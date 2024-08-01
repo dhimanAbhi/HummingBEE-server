@@ -51,6 +51,11 @@ passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser());
 
 // Register route
+
+app.get('/', (req, res) => {
+    res.send('heyyyyy');
+});
+
 app.post('/register', async (req, res) => {
     try{
         const {name, username, scores, email, password} = req.body;
@@ -145,9 +150,7 @@ app.get('/checkAuth', (req, res) => {
     }
 });
 
-app.get('/', (req, res) => {
-    res.send('heyyyyy');
-});
+
 
 app.listen(4000, () => {
     console.log('Server running on port 4000');
