@@ -9,7 +9,6 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-
 import User from './models/user.js';
 import Scores from './models/scores.js';
 
@@ -82,7 +81,6 @@ app.get('/scores/:userId', async (req, res) => {
     }
   });
 
-
 app.post('/scores', async (req, res) => {
     try {
         const { author, data } = req.body;
@@ -111,28 +109,6 @@ app.post('/scores', async (req, res) => {
 });
 
 
-
-// const { author, data } = req.body;
-// console.log(data)
-// const transformedData = Object.keys(data).map(parameter => ({
-//   parameter,
-//   value: data[parameter]
-// }));
-
-// const newScore = new Score({
-//   author: mongoose.Types.ObjectId(author),
-//   data: transformedData
-// });
-
-// await newScore.save();
-// await User.findByIdAndUpdate(
-//   author,
-//   { $push: { scores: newScore._id } },
-//   { new: true, useFindAndModify: false }
-// );
-
-// res.status(201).json({ message: 'Score added successfully', score: newScore });
-
 app.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
         if (err) return next(err);
@@ -160,7 +136,7 @@ app.post('/logout', (req, res) => {
     });
 });
 
-// Check if user is logged in
+
 app.get('/checkAuth', (req, res) => {
     if (req.isAuthenticated()) {
         return res.json({ authenticated: true, user: req.user });
