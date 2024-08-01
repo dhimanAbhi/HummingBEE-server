@@ -33,7 +33,7 @@ const corsOptions = {
     origin: 'https://humming-bee-frontend.vercel.app',
     methods: ['GET', 'POST'],
     credentials: true,
-    // allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
   
 app.use(cors(corsOptions));
