@@ -143,9 +143,9 @@ app.post('/logout', (req, res) => {
     });
 });
 
-app.get('/checkAuth', (req, res) => {
+app.get('/random', (req, res) => {
     if (req.isAuthenticated()) {
-        return res.json({ authenticated: true, user: req.user });
+        return res.json({ authenticated: "abhishek", user: "dhiman"});
     } else {
         return res.json({ authenticated: false });
     }
