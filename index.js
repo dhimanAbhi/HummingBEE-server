@@ -30,12 +30,12 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // Correct CORS configuration
 const corsOptions = {
-    origin: ['https://humming-bee-frontend.vercel.app', 'https://humming-bee-front-git-84b4f7-abhishek-dhimans-projects-f1fd5dda.vercel.app'],
+    origin: 'https://humming-bee-frontend.vercel.app',
     methods: ['GET', 'POST'],
     credentials: true,
     // allowedHeaders: ['Content-Type', 'Authorization'],
 };
-
+  
 app.use(cors(corsOptions));
 app.use(cookieParser('thisisnotagoodsecret'));
 
