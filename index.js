@@ -59,7 +59,7 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.get('/', (req, res) => {
-    res.send('heyyyyy');
+    res.json({boy:'heyyyyy', girl:'shut up'});
 });
 
 app.post('/register', async (req, res) => {
