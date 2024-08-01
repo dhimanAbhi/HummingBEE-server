@@ -28,7 +28,7 @@ db.once('open', () => {
 app.use(bodyParser.json({ extended: true, limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 // app.use(cors({ origin: 'http://localhost:3000', methods: ['GET', 'POST'], credentials: true }));
-app.use(cors({ origin: 'https://humming-bee-frontend.vercel.app/', methods: ['GET', 'POST'], credentials: true }));
+app.use(cors({ origin: 'https://humming-bee-frontend.vercel.app', methods: ['GET', 'POST'], credentials: true }));
 app.use(cookieParser('thisisnotagoodsecret'));
 
 const sessionOptions = {
