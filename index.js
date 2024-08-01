@@ -14,7 +14,7 @@ import Scores from './models/scores.js';
 
 const app = express();
 
-mongoose.connect("mongodb+srv://abhi2002dhi:nidhidhiman@cluster0.kp6ro.mongodb.net/hummingBee?retryWrites=true&w=majority&appName=Cluster0", {
+mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
@@ -27,8 +27,15 @@ db.once('open', () => {
 
 app.use(bodyParser.json({ extended: true, limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-// app.use(cors({ origin: 'http://localhost:3000', methods: ['GET', 'POST'], credentials: true }));
-app.use(cors({ origin: 'https://humming-bee-frontend.vercel.app', methods: ['GET', 'POST'], credentials: true }));
+
+// Correct CORS configuration
+const corsOptions = {
+    origin: 'https://humming-bee-frontend.vercel.app', // No trailing slash
+    methods: ['GET', 'POST'],
+    credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(cookieParser('thisisnotagoodsecret'));
 
 const sessionOptions = {
@@ -47,24 +54,22 @@ app.use(session(sessionOptions));
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new LocalStrategy(User.authenticate()))
-passport.serializeUser(User.serializeUser())
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
-// Register route
 
 app.get('/', (req, res) => {
     res.send('heyyyyy');
 });
 
 app.post('/register', async (req, res) => {
-    try{
-        const {name, username, scores, email, password} = req.body;
-        const user = new User({name, username, scores, email})
+    try {
+        const { name, username, scores, email, password } = req.body;
+        const user = new User({ name, username, scores, email });
         const registeredUser = await User.register(user, password);
-        console.log("User registered: ", registeredUser)
-        return res.json({data:registeredUser, message:"Registration Successful", type:"success"}) 
-    }catch (err) {
+        console.log("User registered: ", registeredUser);
+        return res.json({ data: registeredUser, message: "Registration Successful", type: "success" });
+    } catch (err) {
         console.error('Registration error:', err);
         return res.status(500).json({ data: null, message: err.message, type: 'error' });
     }
@@ -72,25 +77,24 @@ app.post('/register', async (req, res) => {
 
 app.get('/scores/:userId', async (req, res) => {
     try {
-      const { userId } = req.params;
-      const user = await User.findById(userId).populate('scores');
-      
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      const scores = await Scores.find({ user: userId });
-  
-      return res.json({ data: scores, message: 'Scores fetched successfully', type: 'success' });
+        const { userId } = req.params;
+        const user = await User.findById(userId).populate('scores');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const scores = await Scores.find({ user: userId });
+
+        return res.json({ data: scores, message: 'Scores fetched successfully', type: 'success' });
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ data: null, message: err.message, type: 'error' });
+        console.error(err);
+        return res.status(500).json({ data: null, message: err.message, type: 'error' });
     }
-  });
+});
 
 app.post('/scores', async (req, res) => {
     try {
         const { author, data } = req.body;
-        // console.log(data);
         const user = await User.findById(author);
         if (!user) {
             return res.status(404).json({ data: null, message: 'User not found', type: 'error' });
@@ -104,16 +108,14 @@ app.post('/scores', async (req, res) => {
             data: transformedData
         });
         await scores.save();
-        user.scores = scores._id;    
-        await user.save();   
+        user.scores = scores._id;
+        await user.save();
         return res.json({ data: req.body, message: "Scores created successfully", type: "success" });
-
     } catch (err) {
         console.error(err); // Log the error for debugging
         return res.status(500).json({ data: null, message: err.message, type: "error" });
     }
 });
-
 
 app.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
@@ -125,7 +127,6 @@ app.post('/login', (req, res, next) => {
         });
     })(req, res, next);
 });
-
 
 app.post('/logout', (req, res) => {
     req.logout((err) => {
@@ -142,7 +143,6 @@ app.post('/logout', (req, res) => {
     });
 });
 
-
 app.get('/checkAuth', (req, res) => {
     if (req.isAuthenticated()) {
         return res.json({ authenticated: true, user: req.user });
@@ -150,8 +150,6 @@ app.get('/checkAuth', (req, res) => {
         return res.json({ authenticated: false });
     }
 });
-
-
 
 app.listen(4000, () => {
     console.log('Server running on port 4000');
