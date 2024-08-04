@@ -11,7 +11,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import User from './models/user.js';
 import Scores from './models/scores.js';
-
+import Task from './models/task.js';
 const app = express();
 
 mongoose.connect("mongodb+srv://abhi2002dhi:nidhidhiman@cluster0.kp6ro.mongodb.net/hummingBee?retryWrites=true&w=majority&appName=Cluster0", {
@@ -30,7 +30,8 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // Correct CORS configuration
 const corsOptions = {
-    origin: 'https://humming-bee-frontend.vercel.app',
+    // origin: 'https://humming-bee-frontend.vercel.app',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true,
 };
@@ -90,7 +91,7 @@ app.get('/scores/:userId', async (req, res) => {
         console.error(err);
         return res.status(500).json({ data: null, message: err.message, type: 'error' });
     }
-});
+}); 
 
 app.post('/scores', async (req, res) => {
     try {
@@ -150,6 +151,59 @@ app.get('/random', (req, res) => {
         return res.json({ authenticated: false });
     }
 });
+
+
+
+app.get('/tasks/:index', async (req, res) => {
+    try{ 
+        const {index} = req.params;
+        const tasks = await Task.find().populate('user')
+        console.log("tasksssssssss ",tasks)
+        return res.json(tasks)    
+    }
+    catch(err){
+        return res.json({data:null, message:err.message, type:"error"})
+    }
+    
+})
+
+app.post('/tasks/createTask', async (req, res) => {
+    try{
+            const taskData = req.body
+            const task = new Task({...taskData})
+            const user = await User.findById(taskData.author)
+            task.user = taskData.author;
+            user.tasks.push(task)
+            await task.save()    
+            await user.save()
+            return res.json({data:task, message:"Task created successfully", type:"success"})
+        } 
+    catch(err){
+        return res.json({data:null, message:err.message, type:"error"})
+    }
+})
+
+app.post('/tasks/deleteTask', async (req, res) => {
+    try {
+        const { task } = req.body;
+        if (!task || !task._id) {
+            return res.json({ data: null, message: "Task ID is required", type: "error" });
+        }
+        const deletedTask = await Task.findByIdAndDelete(task._id);
+        if (!deletedTask) {
+            return res.json({ data: null, message: "Task not found", type: "error" });
+        }
+        if (task.user && task.user._id) {
+            await User.findByIdAndUpdate(task.user._id, { $pull: { tasks: task._id } });
+        }
+        return res.json({ data: deletedTask, message: "Task deleted successfully", type: "success" });
+    } catch (err) {
+        return res.json({ data: null, message: err.message, type: "error" });
+    }
+});
+
+
+
 
 app.listen(4000, () => {
     console.log('Server running on port 4000');

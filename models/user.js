@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema({
     scores: {
         type:mongoose.Schema.Types.ObjectId,
         ref:'Scores'
-    }
+    },
+    tasks:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Task'
+    }]
 });
 
 userSchema.plugin(passportLocalMongoose)
