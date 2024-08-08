@@ -183,6 +183,25 @@ app.post('/tasks/createTask', async (req, res) => {
     }
 })
 
+
+app.post('/tasks/completeTask', async (req, res) => {
+    try {
+        const { taskId } = req.body; // Assuming you're sending the task ID in the request body
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ data: null, message: "Task not found", type: "error" });
+        }
+        task.completed = !task.completed;
+        await task.save();
+
+        return res.json({ data: task, message: "Task updated successfully", type: "success" });
+    } catch (err) {
+        return res.status(500).json({ data: null, message: err.message, type: "error" });
+    }
+});
+
+
+
 app.post('/tasks/deleteTask', async (req, res) => {
     try {
         const { task } = req.body;
