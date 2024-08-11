@@ -18,7 +18,7 @@ mongoose.connect("mongodb+srv://abhi2002dhi:nidhidhiman@cluster0.kp6ro.mongodb.n
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
-
+ 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error'));
 db.once('open', () => {
@@ -65,8 +65,8 @@ app.get('/', (req, res) => {
 
 app.post('/register', async (req, res) => {
     try {
-        const { name, username, scores, email, password } = req.body;
-        const user = new User({ name, username, scores, email });
+        const { name, username, scores, email, password, role, team } = req.body;
+        const user = new User({ name, username, scores, email, role, team });
         const registeredUser = await User.register(user, password);
         console.log("User registered: ", registeredUser);
         return res.json({ data: registeredUser, message: "Registration Successful", type: "success" });
@@ -75,6 +75,18 @@ app.post('/register', async (req, res) => {
         return res.status(500).json({ data: null, message: err.message, type: 'error' });
     }
 });
+
+app.get('/avgscores', async (req, res) => {
+    try {
+
+        const scores = await Scores.find().populate('user');
+
+        return res.json({ data: scores, message: 'Scores fetched successfully', type: 'success' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ data: null, message: err.message, type: 'error' });
+    }
+})
 
 app.get('/scores/:userId', async (req, res) => {
     try {

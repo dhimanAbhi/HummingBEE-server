@@ -11,17 +11,27 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    scores: {
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Scores'
+    role: {
+        type: String,
+        enum: ['Employee', 'HR'],
+        required: true,
     },
-    tasks:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Task'
+    team:{
+        type: String,
+        enum: ['Development', 'Design', 'Management', 'Team'],
+        required: true,
+    },
+    scores: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Scores'
+    },
+    tasks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task'
     }]
 });
 
-userSchema.plugin(passportLocalMongoose)
+userSchema.plugin(passportLocalMongoose);
 
 const User = mongoose.model('User', userSchema);
 
