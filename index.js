@@ -107,7 +107,7 @@ app.get('/scores/:userId', async (req, res) => {
 
 app.post('/scores', async (req, res) => {
     try {
-        const { author, data } = req.body;
+        const { date, author, data } = req.body;
         const user = await User.findById(author);
         if (!user) {
             return res.status(404).json({ data: null, message: 'User not found', type: 'error' });
@@ -117,6 +117,7 @@ app.post('/scores', async (req, res) => {
             value: data[parameter]
         }));
         const scores = new Scores({
+            date: date,
             user: author,
             data: transformedData
         });
