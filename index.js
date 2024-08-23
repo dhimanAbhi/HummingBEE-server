@@ -142,7 +142,7 @@ app.post('/login', (req, res, next) => {
     })(req, res, next);
 });
 
-app.post('/logout', (req, res) => {
+app.post('/logout', async (req, res) => {
     req.logout((err) => {
         if (err) {
             return res.status(500).json({ message: 'Failed to log out', type: 'error' });
@@ -155,6 +155,7 @@ app.post('/logout', (req, res) => {
             return res.json({ message: 'Logged out successfully', type: 'success' });
         });
     });
+
 });
 
 app.get('/random', (req, res) => {
