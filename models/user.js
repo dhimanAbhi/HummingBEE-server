@@ -16,18 +16,22 @@ const userSchema = new mongoose.Schema({
         enum: ['Employee', 'HR'],
         required: true,
     },
-    team:{
+    team: {
         type: String,
         enum: ['Development', 'Design', 'Management', 'Team'],
         required: true,
     },
     scores: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Scores'
+        ref: 'Scores',
     },
     tasks: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Task'
+        ref: 'Task',
+    }],
+    mood: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Mood',
     }]
 });
 
@@ -36,3 +40,6 @@ userSchema.plugin(passportLocalMongoose);
 const User = mongoose.model('User', userSchema);
 
 export default User;
+
+
+

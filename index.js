@@ -12,6 +12,8 @@ import cors from 'cors';
 import User from './models/user.js';
 import Scores from './models/scores.js';
 import Task from './models/task.js';
+import Mood from './models/mood.js';
+
 const app = express();
 
 mongoose.connect("mongodb+srv://abhi2002dhi:nidhidhiman@cluster0.kp6ro.mongodb.net/hummingBee?retryWrites=true&w=majority&appName=Cluster0", {
@@ -169,17 +171,21 @@ app.get('/random', (req, res) => {
 
 
 app.get('/tasks/:index', async (req, res) => {
-    try{ 
-        const {index} = req.params;
-        const tasks = await Task.find().populate('user')
-        console.log("tasksssssssss ",tasks)
-        return res.json(tasks)    
+    try { 
+        const { index } = req.params;
+        
+        // Fetch tasks where the user._id matches the provided index
+        const tasks = await Task.find({ user: index }).populate('user');
+        
+        if (!tasks) {
+            return res.status(404).json({ data: null, message: 'Tasks not found', type: 'error' });
+        }
+        
+        return res.json(tasks);
+    } catch (err) {
+        return res.status(500).json({ data: null, message: err.message, type: 'error' });
     }
-    catch(err){
-        return res.json({data:null, message:err.message, type:"error"})
-    }
-    
-})
+});
 
 app.post('/tasks/createTask', async (req, res) => {
     try{
@@ -230,6 +236,54 @@ app.post('/tasks/deleteTask', async (req, res) => {
             await User.findByIdAndUpdate(task.user._id, { $pull: { tasks: task._id } });
         }
         return res.json({ data: deletedTask, message: "Task deleted successfully", type: "success" });
+    } catch (err) {
+        return res.json({ data: null, message: err.message, type: "error" });
+    }
+});
+
+app.get('/getMood', async (req, res) => {
+    try {
+        const moods = await Mood.find().populate('user');
+
+        return res.json({ data: moods, message: "Moods fetched successfully", type: "success" });
+    } catch (err) {
+        return res.json({ data: null, message: err.message, type: "error" });
+    }
+});
+
+
+app.post('/mood', async (req, res) => {
+    try {
+        const moodData = req.body;
+
+        const currentDate = new Date();
+        const startOfDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+
+        let mood = await Mood.findOne({
+            user: moodData.author,
+            date: { $gte: startOfDay, $lt: new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000) } // from start of day to end of day
+        });
+
+        const user = await User.findById(moodData.author);
+
+        if (!user) {
+            return res.json({ data: null, message: "User not found", type: "error" });
+        }
+
+        if (mood) {
+            mood.data = moodData.mood;
+        } else {
+            mood = new Mood({
+                data: moodData.mood,
+                date: startOfDay,  
+                user: moodData.author
+            });
+            user.mood.push(mood);
+        }
+        await mood.save();
+        await user.save();
+
+        return res.json({ data: mood, message: "Mood record processed successfully", type: "success" });
     } catch (err) {
         return res.json({ data: null, message: err.message, type: "error" });
     }
