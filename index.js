@@ -283,7 +283,7 @@ app.post('/mood', async (req, res) => {
         await mood.save();
         await user.save();
 
-        return res.json({ data: mood, message: "Mood record processed successfully", type: "success" });
+        return res.json({ data: mood, message: "Performance updated successfully", type: "success" });
     } catch (err) {
         return res.json({ data: null, message: err.message, type: "error" });
     }
