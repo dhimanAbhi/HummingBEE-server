@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
     mood: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Mood',
+    }],
+    checkInOutHistory: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CheckInOutTime',
     }]
 });
 
@@ -40,6 +44,3 @@ userSchema.plugin(passportLocalMongoose);
 const User = mongoose.model('User', userSchema);
 
 export default User;
-
-
-

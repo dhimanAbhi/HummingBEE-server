@@ -13,6 +13,7 @@ import User from './models/user.js';
 import Scores from './models/scores.js';
 import Task from './models/task.js';
 import Mood from './models/mood.js';
+import CheckInOutTime from './models/checkInOut.js';
 
 const app = express();
 
@@ -290,6 +291,110 @@ app.post('/mood', async (req, res) => {
 });
 
 
+
+app.get('/getCheckInOut/:userId', async (req, res) => {
+    try {
+      const userId = req.params.userId; 
+  
+      const today = new Date();
+      const todayDateOnly = new Date(today.setHours(0, 0, 0, 0));
+  
+      const user = await User.findById(userId).populate('checkInOutHistory');
+  
+      const checkInOutData = user.checkInOutHistory.find((record) => {
+        const checkInDateOnly = new Date(record.checkIn).setHours(0, 0, 0, 0);
+        return checkInDateOnly === todayDateOnly.getTime(); 
+      });
+  
+      if (!checkInOutData) {
+        return res.status(200).json({data:{
+          checkIn: "",
+          checkOut: "",
+          user: userId
+        }, message:"Got check-in-out successfully", type:"success"});
+      }
+  
+      return res.status(200).json({data:checkInOutData, message:"Got check-in-out successfully", type: "success"});
+    } catch (error) {
+      console.error('Error fetching check-in/out data:', error);
+      return res.status(500).json({
+        message: "Internal Server Error",
+        type: "error",
+        error: error.message
+      });
+    }
+  });
+  
+
+app.post('/setCheckInOut', async (req, res) => {
+    try {
+      const { user, checkIn, checkOut } = req.body;
+      const userFetched = await User.findById(user);
+      console.log(req.body)
+ 
+      if (!userFetched) {
+        return res.status(404).json({ message: "User not found", type: "error" });
+      }
+  
+      const checkInDate = new Date(checkIn).setHours(0, 0, 0, 0);
+  
+      let existingRecord = await CheckInOutTime.findOne({
+        user: user,
+        checkIn: {
+          $gte: new Date(checkInDate),
+          $lt: new Date(checkInDate + 24 * 60 * 60 * 1000) 
+        }
+      });
+  
+      if (existingRecord) {
+        existingRecord.checkIn = checkIn; 
+        existingRecord.checkOut = checkOut; 
+        await existingRecord.save();
+  
+        return res.json({
+          data: existingRecord,
+          message: "Check-in/out time updated successfully.",
+          type: "success"
+        });
+      }
+  
+      const checkInOutRecord = new CheckInOutTime({
+        checkIn,
+        checkOut,
+        user: user
+      });
+  
+      await checkInOutRecord.save();
+  
+      userFetched.checkInOutHistory.push(checkInOutRecord._id);
+      await userFetched.save();
+  
+      return res.json({
+        data: checkInOutRecord,
+        message: "Successfully Checked-In/Out",
+        type: "success"
+      });
+    } catch (error) {
+      console.error('Error setting check-in/out time:', error);
+      return res.status(500).json({
+        message: "Internal Server Error",
+        type: "error",
+        error: error.message
+      });
+    }
+  });
+  
+
+  app.get('/getUserData', async (req, res) => {
+    try {
+      const users = await User.find().populate('checkInOutHistory').exec();
+  
+      res.status(200).json({data:users, type:"success"});
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 
 
 app.listen(4000, () => {
