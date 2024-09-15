@@ -33,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // Correct CORS configuration
 const corsOptions = {
-    origin: 'https://humming-bee-frontend.vercel.app',
+    origin: 'https://humming-bee-frontend-6noc.vercel.app',
     // origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true,
